@@ -1,0 +1,31 @@
+/* 全局样式表 */
+html, body, #app {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    min-width: 1366px;
+}
+@import url("//unpkg.com/element-ui@2.15.0/lib/theme-chalk/index.css");
+
+.el-breadcrumb {
+    margin-bottom: 15px;
+    font-size: 12px;
+}
+.el-card {
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15) !important;
+}
+
+.el-table {
+    margin-top: 15px;
+    font-size: 12px;
+}
+.el-pagination {
+    margin-top: 15px;
+}
+.el-step__title {
+    font-size: 14px !important;
+}
+.el-step__icon {
+    width: 20px !important;
+    height: 20px !important;
+}
