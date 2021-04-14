@@ -33,10 +33,17 @@
               <el-step title="创建" :description="scope.row.createTime"></el-step>
               <el-step v-for="stage in scope.row.stages"
                        :key="stage.stageId"
-                       :description="scope.row.currentStage > stage.stageIndex ?
-                        stage.startTime + '\n' + stage.endTime :
-                        (scope.row.currentStage === stage.stageIndex ? stage.startTime : '')"
                        :title="'阶段' + stage.stageIndex">
+                <template slot="description">
+                  <div v-if="scope.row.currentStage > stage.stageIndex">
+                    <span>{{ stage.startTime }}</span>
+                    <br>
+                    <span>{{ stage.endTime }}</span>
+                  </div>
+                  <div v-else-if="scope.row.currentStage === stage.stageIndex">
+                    <span>{{ stage.startTime }}</span>
+                  </div>
+                </template>
               </el-step>
               <el-step title="结束" :description="scope.row.endTime"></el-step>
             </el-steps>

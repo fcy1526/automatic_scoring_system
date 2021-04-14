@@ -158,7 +158,9 @@ export default {
         // 小组长评分
         504: 'iconfont icon-leader_xg_xsst',
         // 最终项目评分
-        505: 'iconfont icon-end'
+        505: 'iconfont icon-end',
+        // 日志管理
+        6: 'iconfont icon-ziyuanxhdpi'
       },
       // 是否折叠
       isCollapse: false,

@@ -68,7 +68,7 @@
                   </el-table-column>
                   <el-table-column label="count" prop="count" width="80px">
                     <template slot-scope="scope">
-                      <span>{{scope.row.count}} / 50</span>
+                      <span>{{scope.row.count}} / {{scope.row.total}}</span>
                     </template>
                   </el-table-column>
                   <el-table-column label="操作" width="80px">
@@ -142,28 +142,15 @@ export default {
       scoreProgress: [
         {
           name: '学生表现评分',
-          percent: 70,
-          count: 30
+          percent: 100,
+          count: 10,
+          total: 10
         },
         {
           name: '小组成绩',
-          percent: 70,
-          count: 30
-        },
-        {
-          name: '小组互评',
-          percent: 70,
-          count: 30
-        },
-        {
-          name: '小组长评分',
-          percent: 70,
-          count: 30
-        },
-        {
-          name: '教师评分',
-          percent: 70,
-          count: 30
+          percent: 100,
+          count: 5,
+          total: 5
         }
       ]
     }
