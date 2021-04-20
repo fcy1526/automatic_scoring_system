@@ -58,7 +58,7 @@ export default {
   methods: {
     // 查询日志
     async getLogList () {
-      const { data: res } = await this.$http.get('scoreapi/log/sysErrLog', { params: this.queryInfo })
+      const { data: res } = await this.$http.get('logapi/log/sysErrLog', { params: this.queryInfo })
       if (!res.returnCode) return this.$message.error(res.returnMsg)
       this.logList = res.data.list
       this.total = res.data.total
