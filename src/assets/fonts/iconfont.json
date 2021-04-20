@@ -6,6 +6,27 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "7533289",
+      "name": "日志",
+      "font_class": "rizhi",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "14444974",
+      "name": "成绩",
+      "font_class": "chengji",
+      "unicode": "e727",
+      "unicode_decimal": 59175
+    },
+    {
+      "icon_id": "20104510",
+      "name": "日志",
+      "font_class": "rizhi1",
+      "unicode": "e617",
+      "unicode_decimal": 58903
+    },
+    {
       "icon_id": "7791973",
       "name": "日志",
       "font_class": "ziyuanxhdpi",

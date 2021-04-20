@@ -33,7 +33,7 @@
                 ref="courseListRef">
         <el-table-column label="#" type="index"></el-table-column>
         <el-table-column label="课程名称" prop="name"></el-table-column>
-        <el-table-column label="状态" prop="status" width="100px" align="center">
+        <el-table-column label="状态" width="100px" align="center">
           <template slot-scope="scope">
             <el-tag v-if="scope.row.status === 'WAIT'">未开始</el-tag>
             <el-tag type="success" v-else-if="scope.row.status === 'PROCESS'">进行中</el-tag>
@@ -48,7 +48,12 @@
           </template>
         </el-table-column>
         <el-table-column label="总阶段数" prop="stageNum" width="80px" align="center"></el-table-column>
-        <el-table-column label="评分进度" align="center"></el-table-column>
+        <el-table-column label="评分进度" align="center">
+          <template slot-scope="scope">
+            <el-progress :percentage="scope.row.scoreCount/scope.row.classCount*100"
+                         :status="scope.row.scoreCount === scope.row.classCount ? 'success' : ''"></el-progress>
+          </template>
+        </el-table-column>
         <el-table-column label="开始时间" prop="currentStageTime" align="center"></el-table-column>
         <el-table-column label="操作" align="center" width="150px">
           <template slot-scope="scope">
@@ -180,6 +185,7 @@ export default {
       if (!res.returnCode) return this.$message.error(res.returnMsg)
       this.$message.success('保存评分成功!')
       this.scoreDialogVisible = false
+      await this.getCourseList()
     }
   }
 }

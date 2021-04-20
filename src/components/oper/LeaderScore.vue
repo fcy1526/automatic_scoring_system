@@ -22,9 +22,10 @@
           </template>
         </el-table-column>
         <el-table-column label="评分进度" align="center">
-<!--          <template slot-scope="scope">-->
-<!--            <el-progress :percentage="scope.row.scoreCount/scope.row.groupCount*100"></el-progress>-->
-<!--          </template>-->
+          <template slot-scope="scope">
+            <el-progress :percentage="scope.row.scoreCount / scope.row.totalCount*100"
+                         :status="scope.row.scoreCount === scope.row.totalCount ? 'success' : ''"></el-progress>
+          </template>
         </el-table-column>
         <el-table-column label="操作" align="center" width="150px">
           <template slot-scope="scope">
@@ -36,17 +37,17 @@
           </template>
         </el-table-column>
       </el-table>
+      <!-- 分页区域 -->
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="queryInfo.pagenum"
+        :page-sizes="[5, 10]"
+        :page-size="queryInfo.pagesize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total">
+      </el-pagination>
     </el-card>
-    <!-- 分页区域 -->
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page="queryInfo.pagenum"
-      :page-sizes="[5, 10]"
-      :page-size="queryInfo.pagesize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="total">
-    </el-pagination>
     <!-- 学生表现评分的对话框 -->
     <el-dialog title="小组长评分" :visible.sync="scoreDialogVisible" width="40%"
                :close-on-click-modal="false">
@@ -115,6 +116,7 @@ export default {
       if (!res.returnCode) return this.$message.error(res.returnMsg)
       this.courseList = res.data.list
       this.total = res.data.total
+      console.log(res)
     },
     // 获取小组成员列表
     async getStudentList (courseId) {
@@ -146,6 +148,7 @@ export default {
       if (!res.returnCode) return this.$message.error(res.returnMsg)
       this.$message.success('保存评分成功!')
       this.scoreDialogVisible = false
+      this.getCourseList()
     }
   }
 }

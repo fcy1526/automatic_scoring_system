@@ -147,6 +147,8 @@ export default {
         401: 'iconfont icon-liebiao',
         // 评分详情
         402: 'iconfont icon-pingfen',
+        // 成绩查询
+        403: 'iconfont icon-chengji',
         // 评分事务
         5: 'iconfont icon-shiwu',
         // 学生评分
@@ -160,7 +162,11 @@ export default {
         // 最终项目评分
         505: 'iconfont icon-end',
         // 日志管理
-        6: 'iconfont icon-ziyuanxhdpi'
+        6: 'iconfont icon-ziyuanxhdpi',
+        // 日常操作日志
+        601: 'iconfont icon-rizhi1',
+        // 系统异常日志
+        602: 'iconfont icon-rizhi'
       },
       // 是否折叠
       isCollapse: false,

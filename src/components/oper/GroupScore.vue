@@ -33,7 +33,7 @@
                 ref="courseListRef">
         <el-table-column label="#" type="index"></el-table-column>
         <el-table-column label="课程名称" prop="name"></el-table-column>
-        <el-table-column label="状态" prop="status" width="100px" align="center">
+        <el-table-column label="状态" width="100px" align="center">
           <template slot-scope="scope">
             <el-tag v-if="scope.row.status === 'WAIT'">未开始</el-tag>
             <el-tag type="success" v-else-if="scope.row.status === 'PROCESS'">进行中</el-tag>
@@ -50,7 +50,8 @@
         <el-table-column label="总阶段数" prop="stageNum" width="80px" align="center"></el-table-column>
         <el-table-column label="评分进度" align="center">
           <template slot-scope="scope">
-            <el-progress :percentage="scope.row.scoreCount/scope.row.groupCount*100"></el-progress>
+            <el-progress :percentage="scope.row.scoreCount / scope.row.groupCount*100"
+                         :status="scope.row.scoreCount === scope.row.groupCount ? 'success' : ''"></el-progress>
           </template>
         </el-table-column>
         <el-table-column label="开始时间" prop="currentStageTime" align="center"></el-table-column>
@@ -76,25 +77,42 @@
       </el-pagination>
     </el-card>
     <!-- 小组的对话框 -->
-    <el-dialog title="小组评分" :visible.sync="scoreDialogVisible" width="40%"
-               :close-on-click-modal="false">
-<!--      <div v-for="stu in studentList" :key="stu.userId">-->
-        <el-table :data="studentList" border stripe style="margin-top: 0px"
-                  :header-cell-style="{background:'#FAFAFA'}"
-                  ref="studentListRef">
-          <el-table-column type="index" label="#" :index="getIndex" align="center" width="100px"></el-table-column>
-          <el-table-column v-for="student in studentList" align="center"
-                           :key="student.userId" :label="student.trueName">
-            <template slot-scope="scope">
-              <el-input v-model="scoreArray[scope.$index][student.index]"></el-input>
-            </template>
-          </el-table-column>
-        </el-table>
-<!--      </div>-->
+    <el-dialog  :visible.sync="scoreDialogVisible" width="40%"
+               :close-on-click-modal="false" @close="scoreDialogClose">
+      <template slot="title">
+        <span>小组评分: </span>
+        <el-select v-model="groupInfo.leaderId" @change="changeGroup" placeholder="请选择" style="margin-left: 20px">
+          <el-option
+            v-for="(leader, index) in leaderList"
+            :key="leader.userId"
+            :label="'第' + (index + 1) + '组, 组长: ' + leader.trueName"
+            :value="leader.userId"></el-option>
+        </el-select>
+      </template>
+      <div v-show="showScoreInput">
+        <el-form ref="scoreFormRef" label-width="120px">
+          <el-form-item label="教师评分">
+            <el-input v-model="scoreForm.teacherScore" style="width: 20%"></el-input>
+          </el-form-item>
+        </el-form>
+        <el-form ref="leaderScoreFormRef" label-width="120px">
+          <el-form-item label="小组长评分">
+            <el-table :data="scoreForm.leaderScore" stripe style="margin-top: 0px !important; width: 85%"
+                      :cell-style="{padding:0+'px'}" :show-header="false">
+              <el-table-column label="学号" prop="userId" width="120px" style="height: 30px"></el-table-column>
+              <el-table-column label="姓名" prop="trueName"></el-table-column>
+              <el-table-column label="评分">
+                <template slot-scope="scope">
+                  <el-input v-model.number="scope.row.score"></el-input>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-form-item>
+        </el-form>
+      </div>
       <!-- 底部区域 -->
       <span slot="footer" class="dialog-footer">
-        <el-button @click="scoreDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="saveScore">确 定</el-button>
+        <el-button type="primary" @click="saveScore">提 交</el-button>
       </span>
     </el-dialog>
   </div>
@@ -107,7 +125,7 @@ export default {
       // 班级列表
       classList: [],
       // 小组长列表
-      studentList: [],
+      leaderList: [],
       // 课程列表
       courseList: [],
       // 获取课程列表的查询参数
@@ -133,7 +151,22 @@ export default {
         courseId: ''
       },
       // 成绩列表
-      scoreArray: {}
+      scoreArray: {},
+      // 小组信息
+      groupInfo: {
+        leaderId: ''
+      },
+      // 小组评分
+      scoreForm: {
+        // 教师评分
+        teacherScore: '',
+        // 小组长评分
+        leaderScore: []
+      },
+      // 控制评分填写表格的显示与隐藏
+      showScoreInput: false,
+      // 当前阶段id
+      currentStageId: ''
     }
   },
   created () {
@@ -145,7 +178,6 @@ export default {
       const { data: res } = await this.$http.get('scoreapi/course/stageGroup', { params: this.queryInfo })
       if (!res.returnCode) return this.$message.error(res.returnMsg)
       this.courseList = res.data.list
-      console.log(this.courseList)
       this.total = res.data.total
     },
     // 获取班级列表
@@ -158,7 +190,7 @@ export default {
     async getStudentList () {
       const { data: res } = await this.$http.get('scoreapi/group/leader', { params: this.scoreClassInfo })
       if (!res.returnCode) return this.$message.error(res.returnMsg)
-      this.studentList = res.data
+      this.leaderList = res.data
     },
     // 监听pagesize改变的事件
     handleSizeChange (newSize) {
@@ -177,26 +209,38 @@ export default {
     },
     // 展示评分对话框
     async showScoreDialog (row) {
-      this.currentStage = row.currentStage
+      this.currentStageId = row.currentStageId
       this.scoreClassInfo.classId = this.queryInfo.classId
       this.scoreClassInfo.courseId = row.courseId
       await this.getStudentList()
-      const size = this.studentList.length
-      var array = new Array(size)
-      for (var i = 0; i < size; i++) {
-        array[i] = new Array(size)
-      }
-      this.scoreArray = array
       this.scoreDialogVisible = true
     },
+    // 切换小组
+    async changeGroup () {
+      const { data: res } = await this.$http.get(
+        'scoreapi/score/groupScore/' + this.currentStageId + '/' + this.groupInfo.leaderId)
+      if (!res.returnCode) return this.$message.error('切换小组失败!')
+      this.showScoreInput = true
+      this.scoreForm = res.data
+    },
     // 保存评分
-    saveScore () {
-      console.log(this.scoreArray)
+    async saveScore () {
+      const { data: res } = await this.$http.post(
+        'scoreapi/score/group/' + this.currentStageId + '/' +
+        this.groupInfo.leaderId + '/' + this.scoreClassInfo.courseId, this.scoreForm)
+      if (!res.returnCode) return this.$message.error('保存评分失败!')
+      return this.$message.success('保存评分成功!')
+    },
+    // 监听对话框关闭事件
+    scoreDialogClose () {
+      this.showScoreInput = false
+      this.leaderList = []
+      this.groupInfo.leaderId = ''
+      this.getCourseList()
     }
   }
 }
 </script>
 
 <style scoped>
-
 </style>

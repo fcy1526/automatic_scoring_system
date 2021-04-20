@@ -41,7 +41,12 @@
           </template>
         </el-table-column>
         <el-table-column label="总阶段数" prop="stageNum" width="80px" align="center"></el-table-column>
-        <el-table-column label="评分进度" align="center"></el-table-column>
+        <el-table-column label="评分进度" align="center">
+          <template slot-scope="scope">
+            <el-progress :percentage="scope.row.scoreCount / scope.row.totalCount*100"
+                         :status="scope.row.scoreCount === scope.row.totalCount ? 'success' : ''"></el-progress>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" align="center" width="150px">
           <template slot-scope="scope">
             <!-- 评分按钮 -->
@@ -125,6 +130,7 @@ export default {
       if (!res.returnCode) return this.$message.error(res.returnMsg)
       this.courseList = res.data.list
       this.total = res.data.total
+      console.log(res)
     },
     // 获取班级列表
     async getClassList () {
@@ -161,6 +167,7 @@ export default {
       if (!res.returnCode) return this.$message.error(res.returnMsg)
       this.$message.success('保存评分成功!')
       this.scoreDialogVisible = false
+      this.getCourseList()
     }
   }
 }

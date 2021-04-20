@@ -54,7 +54,8 @@
           <template slot-scope="scope">
             <el-tag v-if="scope.row.status === 'WAIT'">未开始</el-tag>
             <el-tag type="success" v-else-if="scope.row.status === 'PROCESS'">进行中</el-tag>
-            <el-tag type="warning" v-else>结束</el-tag>
+            <el-tag type="warning" v-else-if="scope.row.status === 'FINISH'">结束</el-tag>
+            <el-tag type="info" v-else>已完成</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="当前阶段" prop="currentStage" width="100px" align="center">
@@ -76,32 +77,34 @@
         </el-table-column>
         <el-table-column label="操作" width="130px">
           <template slot-scope="scope">
-            <div v-if="(scope.row.currentStage > 0 && scope.row.currentStage <= scope.row.stageNum)
-                            ? scope.row.status === 'PROCESS' : false">
-              <!-- 结束当前阶段按钮 -->
-              <el-tooltip class="item" effect="dark" content="结束当前阶段" placement="top">
-                <el-button size="mini" icon="el-icon-close" type="danger"
-                           @click="stopCurrentStage(scope.row)"></el-button>
-              </el-tooltip>
-              <!-- 开启互评阶段按钮 -->
-              <el-tooltip class="item" effect="dark" content="开启互评" placement="top">
-                <el-button size="mini" icon="el-icon-collection-tag" type="warning"
-                           @click="startMutual(scope.row)"></el-button>
-              </el-tooltip>
-            </div>
-            <!-- 开启下一阶段按钮 -->
-            <div v-else-if="scope.row.status !== 'FINISH'">
-              <el-tooltip class="item" effect="dark" content="开启下一阶段" placement="top">
-                <el-button size="mini" type="primary" icon="el-icon-check"
-                           @click="startNewStage(scope.row)"></el-button>
-              </el-tooltip>
-            </div>
-            <!-- 统计总分 -->
-            <div v-show="scope.row.status === 'FINISH'">
-              <el-tooltip class="item" effect="dark" content="统计总分" placement="top">
-                <el-button size="mini" type="success" icon="el-icon-coin"
-                           @click="getTotalScore(scope.row)"></el-button>
-              </el-tooltip>
+            <div v-if="scope.row.status === 'COMPLETE' ? false : true">
+              <div v-if="(scope.row.currentStage > 0 && scope.row.currentStage <= scope.row.stageNum)
+                              ? scope.row.status === 'PROCESS' : false">
+                <!-- 结束当前阶段按钮 -->
+                <el-tooltip class="item" effect="dark" content="结束当前阶段" placement="top">
+                  <el-button size="mini" icon="el-icon-close" type="danger"
+                             @click="stopCurrentStage(scope.row)"></el-button>
+                </el-tooltip>
+                <!-- 开启互评阶段按钮 -->
+                <el-tooltip class="item" effect="dark" content="开启互评" placement="top">
+                  <el-button size="mini" icon="el-icon-collection-tag" type="warning"
+                             @click="startMutual(scope.row)"></el-button>
+                </el-tooltip>
+              </div>
+              <!-- 开启下一阶段按钮 -->
+              <div v-else-if="scope.row.status !== 'FINISH'">
+                <el-tooltip class="item" effect="dark" content="开启下一阶段" placement="top">
+                  <el-button size="mini" type="primary" icon="el-icon-check"
+                             @click="startNewStage(scope.row)"></el-button>
+                </el-tooltip>
+              </div>
+              <!-- 统计总分 -->
+              <div v-show="scope.row.status === 'FINISH'">
+                <el-tooltip class="item" effect="dark" content="统计总分" placement="top">
+                  <el-button size="mini" type="success" icon="el-icon-coin"
+                             @click="showTotalDialog(scope.row)"></el-button>
+                </el-tooltip>
+              </div>
             </div>
           </template>
         </el-table-column>
@@ -174,6 +177,42 @@
         <el-button type="primary" @click="addCourse">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 设置分数占比的对话框 -->
+    <el-dialog title="设置分数占比" :visible.sync="showTotalDialogVisible" width="30%"
+               @close="totalDialogClosed">
+      <el-form :model="proportionForm" ref="proportionFormRef" label-width="120px">
+        <el-form-item label="学生表现评分">
+          <el-input v-model.number="proportionForm.studentScore" class="inputStyle">
+            <template slot="append">%</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="小组评分">
+          <el-input v-model.number="proportionForm.groupScore" class="inputStyle">
+            <template slot="append">%</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="小组互评">
+          <el-input v-model.number="proportionForm.mutualScore" class="inputStyle">
+            <template slot="append">%</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="小组长评分">
+          <el-input v-model.number="proportionForm.leaderScore" class="inputStyle">
+            <template slot="append">%</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="最终项目评分">
+          <el-input v-model.number="proportionForm.teacherScore" class="inputStyle">
+            <template slot="append">%</template>
+          </el-input>
+        </el-form-item>
+      </el-form>
+      <!-- 底部区域 -->
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showTotalDialog = false">取 消</el-button>
+        <el-button type="primary" @click="count">统 计</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -233,7 +272,19 @@ export default {
         }
       },
       // 上一个展开的行
-      lastExpandRow: {}
+      lastExpandRow: {},
+      // 控制统计总分对话框的显示与隐藏
+      showTotalDialogVisible: false,
+      // 分数占比表单
+      proportionForm: {
+        studentScore: 0,
+        groupScore: 0,
+        mutualScore: 0,
+        leaderScore: 0,
+        teacherScore: 0
+      },
+      // 待统计的课程id
+      totalCourseId: ''
     }
   },
   created () {
@@ -320,6 +371,23 @@ export default {
       const { data: res } = await this.$http.post('scoreapi/course/openMutual',
         { courseId: row.courseId })
       if (!res.returnCode) return this.$message.error('开启互评失败! 原因: ' + res.returnMsg)
+      this.$message.success('开启互评成功!')
+    },
+    // 展示统计总分对话框
+    showTotalDialog (row) {
+      this.showTotalDialogVisible = true
+      this.totalCourseId = row.courseId
+    },
+    // 监听统计总分对话框关闭事件
+    totalDialogClosed () {
+      this.$refs.proportionFormRef.resetFields()
+    },
+    // 统计总分
+    async count () {
+      const { data: res } = await this.$http.post('scoreapi/score/count/' + this.totalCourseId, this.proportionForm)
+      if (!res.returnCode) return this.$message.error('统计总分失败! 原因: ' + res.returnMsg)
+      this.$message.success('统计总分成功!')
+      this.showTotalDialogVisible = false
     }
   }
 }
@@ -328,5 +396,8 @@ export default {
 <style scoped>
 .el-tag {
   margin: 3px;
+}
+.inputStyle {
+  width: 110px;
 }
 </style>

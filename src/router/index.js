@@ -16,6 +16,9 @@ import MutualScore from '@/components/oper/MutualScore'
 import LeaderScore from '@/components/oper/LeaderScore'
 import TeacherScore from '@/components/oper/TeacherScore'
 import GroupScore from '@/components/oper/GroupScore'
+import SysLog from '@/components/log/SysLog'
+import SysErrLog from '@/components/log/SysErrLog'
+import UserScore from '@/components/score/UserScore'
 
 Vue.use(VueRouter)
 
@@ -40,7 +43,10 @@ const routes = [
       { path: '/mutualScore', component: MutualScore },
       { path: '/leaderScore', component: LeaderScore },
       { path: '/teacherScore', component: TeacherScore },
-      { path: '/groupScore', component: GroupScore }]
+      { path: '/groupScore', component: GroupScore },
+      { path: '/sysLog', component: SysLog },
+      { path: '/sysErrLog', component: SysErrLog },
+      { path: '/userScore', component: UserScore }]
   }
 ]
 
