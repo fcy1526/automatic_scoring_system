@@ -106,6 +106,13 @@
                 </el-tooltip>
               </div>
             </div>
+            <div v-else>
+              <!-- 显示评分结果 -->
+              <el-tooltip class="item" effect="dark" content="显示评分结果" placement="top">
+                <el-button size="mini" type="success" icon="el-icon-tickets"
+                           @click="showScoreDialog(scope.row)"></el-button>
+              </el-tooltip>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -213,6 +220,23 @@
         <el-button type="primary" @click="count">统 计</el-button>
       </span>
     </el-dialog>
+    <!-- 查看课程评分结果对话框 -->
+    <el-dialog title="评分结果" :visible.sync="showScoreVisible" width="80%">
+      <div v-for="(val, key) in this.score" :key="key">
+        <span>{{ key }} :</span>
+        <el-table :data="val" border stripe :max-height="620"
+                  :header-cell-style="{background:'#FAFAFA'}">
+          <el-table-column label="学号" prop="studentId"></el-table-column>
+          <el-table-column label="真实姓名" prop="trueName"></el-table-column>
+          <el-table-column label="学生表现评分" prop="studentScore"></el-table-column>
+          <el-table-column label="小组评分" prop="groupScore"></el-table-column>
+          <el-table-column label="小组互评分" prop="mutualScore"></el-table-column>
+          <el-table-column label="小组长评分" prop="leaderScore"></el-table-column>
+          <el-table-column label="最终项目评分" prop="teacherScore"></el-table-column>
+          <el-table-column label="总分" prop="score"></el-table-column>
+        </el-table>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -284,7 +308,22 @@ export default {
         teacherScore: 0
       },
       // 待统计的课程id
-      totalCourseId: ''
+      totalCourseId: '',
+      // 控制查看评分结果对话框的显示与隐藏
+      showScoreVisible: false,
+      // 课程评分结果
+      score: [{
+        className: '',
+        totalScore: {
+          studentId: '',
+          trueName: '',
+          studentScore: '',
+          groupScore: '',
+          mutualScore: '',
+          leaderScore: '',
+          teacherScore: ''
+        }
+      }]
     }
   },
   created () {
@@ -388,6 +427,14 @@ export default {
       if (!res.returnCode) return this.$message.error('统计总分失败! 原因: ' + res.returnMsg)
       this.$message.success('统计总分成功!')
       this.showTotalDialogVisible = false
+      this.getCourseList()
+    },
+    // 显示评分结果
+    async showScoreDialog (row) {
+      const { data: res } = await this.$http.get('scoreapi/score/course/' + row.courseId)
+      if (!res.returnCode) return this.$message.error('评分结果获取失败! 原因: ' + res.returnMsg)
+      this.score = res.data
+      this.showScoreVisible = true
     }
   }
 }

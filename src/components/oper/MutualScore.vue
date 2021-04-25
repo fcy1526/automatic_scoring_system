@@ -4,7 +4,7 @@
     <el-breadcrumb separator="/">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>评分事务</el-breadcrumb-item>
-      <el-breadcrumb-item>学生互评</el-breadcrumb-item>
+      <el-breadcrumb-item>小组互评</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 卡片视图区域 -->
     <el-card>
@@ -49,7 +49,7 @@
       </el-pagination>
     </el-card>
     <!-- 学生互评的对话框 -->
-    <el-dialog title="学生互评" :visible.sync="scoreDialogVisible" width="40%"
+    <el-dialog title="小组互评" :visible.sync="scoreDialogVisible" width="40%"
                :close-on-click-modal="false">
       <el-table :data="studentList" border stripe style="margin-top: 0px"
                 :header-cell-style="{background:'#FAFAFA'}"

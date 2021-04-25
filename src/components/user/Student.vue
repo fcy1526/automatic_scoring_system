@@ -26,7 +26,7 @@
       </el-row>
       <!-- 用户列表区域 -->
       <el-table :data="userList" border stripe :default-sort = "{prop: 'userId', order: 'descending'}">
-        <el-table-column type="index" label="#"></el-table-column>
+        <el-table-column type="index" label="#" align="center"></el-table-column>
         <el-table-column prop="userId" label="学号" sortable></el-table-column>
         <el-table-column prop="trueName" label="真实姓名"></el-table-column>
         <el-table-column prop="sexStr" label="性别"></el-table-column>

@@ -16,7 +16,7 @@
         </el-col>
       </el-row>
       <!-- 角色列表区域 -->
-      <el-table :data="roleList" border stripe :max-height="620"
+      <el-table :data="roleList" border stripe :max-height="520"
                 :header-cell-style="{background:'#FAFAFA'}"
                 :row-key="roleList.id"
                 @expand-change="expandChange"

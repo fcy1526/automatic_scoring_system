@@ -27,9 +27,9 @@
       <!-- 用户列表区域 -->
       <el-table :data="teacherList" border stripe>
         <el-table-column type="index" label="#"></el-table-column>
-        <el-table-column prop="userId" label="教师号"></el-table-column>
-        <el-table-column prop="trueName" label="真实姓名"></el-table-column>
-        <el-table-column prop="sexStr" label="性别"></el-table-column>
+        <el-table-column prop="userId" label="教师号" width="150px"></el-table-column>
+        <el-table-column prop="trueName" label="真实姓名" width="120px"></el-table-column>
+        <el-table-column prop="sexStr" label="性别" width="100px"></el-table-column>
         <el-table-column prop="teachClasses" label="教学班级">
           <template slot-scope="scope">
             <el-tag
